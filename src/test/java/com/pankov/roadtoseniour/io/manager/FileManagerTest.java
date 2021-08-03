@@ -1,20 +1,30 @@
 package com.pankov.roadtoseniour.io.manager;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FileManagerTest {
 
-    //    FileManager fileManager = new FileManager();
-    final static String PATH_TO_TEST_RESOURCES = "src\\test\\resources\\";
-    final String TEST_DIR = "testfilemanager\\";
+
+    final static String PATH_TO_TEST_RESOURCES = "src/test/resources/";
+    final static String TEST_DIR = "testfilemanager/";
+
+    @BeforeAll
+    public static void before() throws IOException {
+        File testFileManagerDir = new File(PATH_TO_TEST_RESOURCES +TEST_DIR);
+        testFileManagerDir.mkdir();
+        new File(testFileManagerDir, "test1").mkdir();
+        File test2Dir = new File(testFileManagerDir, "test2");
+        test2Dir.mkdir();
+        new File(test2Dir, "test.txt").createNewFile();
+    }
 
     @Test
     public void testCountFilesInRootDir() throws FileNotFoundException {
@@ -27,7 +37,7 @@ public class FileManagerTest {
     }
 
     @Test
-    public void testCountFilesWithExeption() {
+    public void testCountFilesWithException() {
         assertThrows(FileNotFoundException.class, () ->
                 FileManager.countFiles(PATH_TO_TEST_RESOURCES + TEST_DIR + "test3"));
     }
@@ -74,10 +84,7 @@ public class FileManagerTest {
 
     @AfterAll
     public static void after() throws Exception {
-        Class clazz = FileManager.class;
-        File testDirMoveIn = new File(PATH_TO_TEST_RESOURCES, "testDirForMove");
-        Method removeMethod =  clazz.getDeclaredMethod("remove", String.class);
-        removeMethod.setAccessible(true);
-        removeMethod.invoke(null, testDirMoveIn.getPath());
+        FileManager.remove(new File(PATH_TO_TEST_RESOURCES, "testDirForMove").getAbsolutePath());
+        FileManager.remove(new File(PATH_TO_TEST_RESOURCES +TEST_DIR).getAbsolutePath());
     }
 }

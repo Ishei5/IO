@@ -92,9 +92,10 @@ public class FileManager {
     public static void move(String from, String to) throws IOException {
         copy(from, to);
         remove(from);
+//        new File(from).renameTo(new File(to));
     }
 
-    private static void remove(String from) throws IOException {
+    static void remove(String from) throws IOException {
         File rootFile = new File(from);
 
         if (rootFile.isDirectory()) {
