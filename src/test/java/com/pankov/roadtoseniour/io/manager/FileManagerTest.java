@@ -2,11 +2,10 @@ package com.pankov.roadtoseniour.io.manager;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,15 +14,23 @@ public class FileManagerTest {
 
     final static String PATH_TO_TEST_RESOURCES = "src/test/resources/";
     final static String TEST_DIR = "testfilemanager/";
+    final static String TEST_STRING = "Test copy of file in FileManager";
 
     @BeforeAll
     public static void before() throws IOException {
         File testFileManagerDir = new File(PATH_TO_TEST_RESOURCES +TEST_DIR);
         testFileManagerDir.mkdir();
+
         new File(testFileManagerDir, "test1").mkdir();
+
         File test2Dir = new File(testFileManagerDir, "test2");
         test2Dir.mkdir();
-        new File(test2Dir, "test.txt").createNewFile();
+
+        File testFile = new File(test2Dir, "test.txt");
+        testFile.createNewFile();
+        try (FileOutputStream fileOutputStream = new FileOutputStream(testFile)) {
+            fileOutputStream.write(TEST_STRING.getBytes());
+        }
     }
 
     @Test
@@ -53,17 +60,33 @@ public class FileManagerTest {
     }
 
     @Test
-    public void testCountDirsWithExсeption() {
+    public void testCountDirsWithException() {
         assertThrows(FileNotFoundException.class, () ->
-        FileManager.countDirs(PATH_TO_TEST_RESOURCES + TEST_DIR + "\\test3"));
+        FileManager.countDirs(new File(PATH_TO_TEST_RESOURCES + TEST_DIR, "test3").getPath()));
     }
 
     @Test
-    public void testCopy() throws IOException {
-        FileManager.copy(PATH_TO_TEST_RESOURCES + TEST_DIR, PATH_TO_TEST_RESOURCES + "testfilemanagercopy\\");
+    @DisplayName("testCopy Should be the same count of dirs and files and the same file content")
+    public void testCopyShouldBeTheSameCountOfDirsAndFilesAndSameContentOfFile() throws IOException {
+        FileManager.copy(PATH_TO_TEST_RESOURCES + TEST_DIR, PATH_TO_TEST_RESOURCES + "testfilemanagercopy");
         File duplicatedItem = new File(PATH_TO_TEST_RESOURCES, "testfilemanagercopy");
-        assertTrue(duplicatedItem.exists());
 
+        assertTrue(duplicatedItem.exists());
+        assertEquals(2, FileManager.countDirs(duplicatedItem.getPath()));
+        assertEquals(1, FileManager.countFiles(duplicatedItem.getPath()));
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try(BufferedInputStream fileInputStream = new BufferedInputStream(
+                new FileInputStream(new File(duplicatedItem, "test2/test.txt")))) {
+
+            int value;
+            while((value = fileInputStream.read()) != -1) {
+                stringBuilder.append((char) value);
+            }
+        }
+
+        assertEquals(TEST_STRING, stringBuilder.toString());
     }
 
     @Test
@@ -83,7 +106,7 @@ public class FileManagerTest {
     }
 
     @AfterAll
-    public static void after() throws Exception {
+    public static void after() throws IOException {
         FileManager.remove(new File(PATH_TO_TEST_RESOURCES, "testDirForMove").getAbsolutePath());
         FileManager.remove(new File(PATH_TO_TEST_RESOURCES +TEST_DIR).getAbsolutePath());
     }

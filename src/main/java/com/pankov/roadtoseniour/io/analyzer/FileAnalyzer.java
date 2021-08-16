@@ -1,7 +1,6 @@
 package com.pankov.roadtoseniour.io.analyzer;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,15 +40,13 @@ public class FileAnalyzer {
         StringBuilder stringBuilder = new StringBuilder();
 
         try (BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(
-                    new FileInputStream(pathToFile), StandardCharsets.UTF_8))) {
+                new InputStreamReader(new FileInputStream(pathToFile)))) {
             char[] buffer = new char[3];
             int length;
 //            TODO! файл на русском + buffer[3]
             while ((length = bufferedReader.read(buffer)) > 0) {
                 stringBuilder.append(new String(buffer, 0, length));
             }
-
         }
 
         return stringBuilder.toString();
@@ -90,10 +87,10 @@ public class FileAnalyzer {
 
     static class Result {
 
-        List<String> sentences;
-        int count;
+        private List<String> sentences;
+        private int count;
 
-         Result(List<String> sentences, int count) {
+        private Result(List<String> sentences, int count) {
             this.count = count;
             this.sentences = sentences;
         }

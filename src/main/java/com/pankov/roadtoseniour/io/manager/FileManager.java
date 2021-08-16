@@ -10,7 +10,7 @@ public class FileManager {
         int count = 0;
         File root = new File(path);
         if (!root.exists()) {
-            throw new FileNotFoundException("Еhe current path is not valid");
+            throw new FileNotFoundException("The current path is not valid");
         }
         File[] listFiles = root.listFiles();
 
@@ -33,7 +33,7 @@ public class FileManager {
         int count = 0;
         File root = new File(path);
         if (!root.exists()) {
-            throw new FileNotFoundException("Еhe current path is not valid");
+            throw new FileNotFoundException("The current path is not valid");
         }
         File[] listFiles = new File(path).listFiles();
         if (listFiles != null) {
@@ -87,12 +87,14 @@ public class FileManager {
 
 
     }
+
     //метод по перемещению папок и файлов.
     //Параметр from - путь к файлу или папке, параметр to - путь к папке куда будет производиться копирование.
     public static void move(String from, String to) throws IOException {
-        copy(from, to);
-        remove(from);
-//        new File(from).renameTo(new File(to));
+        if (!new File(from).renameTo(new File(to))) {
+            copy(from, to);
+            remove(from);
+        }
     }
 
     static void remove(String from) throws IOException {
