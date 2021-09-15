@@ -1,42 +1,18 @@
 package com.pankov.roadtoseniour.io.analyzer;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class FileAnalyzer {
+public interface FileAnalyzer {
 
-    final String PUNCTUATION_MARKS = "(?<=\\.)|(?<=!)|(?<=\\?)";
+    String PUNCTUATION_MARKS = "(?<=\\.)|(?<=!)|(?<=\\?)";
 
-    public static void main(String[] args) throws IOException {
-        if (args.length < 2) {
-            throw new IllegalArgumentException("Wrong arguments!");
-        }
+    Result analyze(String pathToFile, String searchWord) throws IOException;
 
-        String pathToFile = args[0];
-        String searchWord = args[1];
-
-        FileAnalyzer fileAnalyzer = new FileAnalyzer();
-        Result result = fileAnalyzer.analyze(pathToFile, searchWord);
-
-        System.out.println(result.count);
-        for (String string : result.sentences) {
-            System.out.println(string);
-        }
-    }
-
-    private Result analyze(String pathToFile, String searchWord) throws IOException {
-        String content = readContent(pathToFile);
-        List<String> sentences = splitIntoSentences(content);
-        List<String> filteredSentences = filter(sentences, searchWord);
-        int count = contWordOccurrences(filteredSentences, searchWord);
-
-        return new Result(filteredSentences, count);
-    }
-
-    String readContent(String pathToFile) throws IOException {
+    default String readContent(String pathToFile) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
 
         try (BufferedReader bufferedReader = new BufferedReader(
@@ -52,50 +28,19 @@ public class FileAnalyzer {
         return stringBuilder.toString();
     }
 
-    List<String> splitIntoSentences(String content) {
-        if (content.isEmpty()) {
-            return new ArrayList<>();
-        }
+    List<String> splitIntoSentences(String content);
 
-        return Stream.of(content.split(PUNCTUATION_MARKS))
-                .map(String::trim)
-                .collect(Collectors.toList());
-    }
+    List<String> filter(List<String> sentences, String searchWord);
 
-    List<String> filter(List<String> sentences, String searchWord) {
-        List<String> filteredSentences = new ArrayList<>();
-        for (String sentence : sentences) {
-            if (sentence.toLowerCase().contains(searchWord.toLowerCase())) {
-                filteredSentences.add(sentence);
-            }
-        }
+    int countWordOccurrences(List<String> filteredSentences, String searchWord);
 
-        return filteredSentences;
-    }
+    class Result {
+        List<String> sentences;
+        int count;
 
-    int contWordOccurrences(List<String> filteredSentences, String searchWord) {
-        int count = 0;
-        for (String sentence : filteredSentences) {
-            int index = 0;
-            while ((index = sentence.toLowerCase().indexOf(searchWord.toLowerCase(), index)) != -1) {
-                index += searchWord.length();
-                count++;
-            }
-        }
-        return count;
-    }
-
-    static class Result {
-
-        private List<String> sentences;
-        private int count;
-
-        private Result(List<String> sentences, int count) {
+        Result(List<String> sentences, int count) {
             this.count = count;
             this.sentences = sentences;
         }
     }
-
 }
-
-
